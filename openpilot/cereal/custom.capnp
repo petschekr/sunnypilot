@@ -480,7 +480,39 @@ struct CustomReserved13 @0xcd96dafb67a082d0 {
 struct CustomReserved14 @0xb057204d7deadf3f {
 }
 
-struct CustomReserved15 @0xbd443b539493bc68 {
+struct Ioniq @0xbd443b539493bc68 {
+    altitudeMsl @0 :Float64;
+
+    chargingType @1 :ChargingType;
+    enum ChargingType {
+        notCharging @0;
+        ac @1;
+        dc @2;
+        other @3;
+    }
+
+    voltage @2 :Float32;
+    current @3 :Float32;
+    maxBatteryTemp @4 :Int8;
+    minBatteryTemp @5 :Int8;
+    batteryInletTemp @6 :Int8;
+    heaterTemp @7 :Int8;
+
+    acInletTemp @12 :Int8;
+    dcInlet1Temp @13 :Int8;
+    dcInlet2Temp @14 :Int8;
+
+    remainingEnergy @8 :Float32;
+    socDisplay @9 :Float32;
+    availableChargePower @10 :Float32;
+    availableDischargePower @11 :Float32;
+    maximumChargeCurrent @17 :Float32;
+    maximumChargePower @18 :Float32;
+    energySinceIgnition @19 :Float32;
+    energySinceCharging @20 :Float32;
+
+    sunrise @15 :Text;
+    sunset @16 :Text;
 }
 
 struct CustomReserved16 @0xfc6241ed8877b611 {
