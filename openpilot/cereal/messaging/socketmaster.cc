@@ -89,10 +89,17 @@ void SubMaster::update(int timeout) {
 
     SubMessage *m = messages_.at(s);
 
+    auto aligned_msg = m->aligned_buf.align(msg);
+    if (aligned_msg.size() == 1) {
+      printf("Skipping too-short message with length 1 on socket %s\n", m->name.c_str());
+      delete msg;
+      continue;
+    }
+
     m->msg_reader->~FlatArrayMessageReader();
     capnp::ReaderOptions options;
     options.traversalLimitInWords = kj::maxValue; // Don't limit
-    m->msg_reader = new (m->allocated_msg_reader) capnp::FlatArrayMessageReader(m->aligned_buf.align(msg), options);
+    m->msg_reader = new (m->allocated_msg_reader) capnp::FlatArrayMessageReader(aligned_msg, options);
     delete msg;
     messages.push_back({m->name, m->msg_reader->getRoot<cereal::Event>()});
   }

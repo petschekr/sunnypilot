@@ -188,6 +188,13 @@ procs += [
   NativeProcess("locationd_llk", "openpilot/sunnypilot/selfdrive/locationd", ["./locationd"], only_onroad),
 ]
 
+# ioniq2mqtt
+procs += [
+  NativeProcess("ioniq2mqtt", "/data", ["./ioniq2mqtt"], always_run),
+  NativeProcess("bridge_zmq", "openpilot/cereal/messaging", ["./bridge"], always_run), # msgq to zmq
+  NativeProcess("bridge_msgq", "openpilot/cereal/messaging", ["./bridge", "127.0.0.1", "ioniq"], always_run), # zmq to msgq for "ioniq" service
+]
+
 if os.path.exists("../../sunnypilot/sunnylink/uploader.py"):
   procs += [PythonProcess("sunnylink_uploader", "openpilot.sunnypilot.sunnylink.uploader", use_sunnylink_uploader_shim)]
 
