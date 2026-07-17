@@ -66,6 +66,24 @@ class HudRenderer(Widget):
     self.speed: float = 0.0
     self.v_ego_cluster_seen: bool = False
 
+    self.altitude: float = 0.0
+    self.power: float = 0.0
+    self.current: float = 0.0
+
+    self.energySinceIgnition: float = 0.0
+    self.energySinceCharging: float = 0.0
+
+    self.maxChargePower: float = 0.0
+    self.maxDischargePower: float = 0.0
+    self.maxRequestedChargeCurrent: float = 0.0
+    self.maxRequestedChargePower: float = 0.0
+    self.minBatteryTemp: int = 0
+    self.maxBatteryTemp: int = 0
+    self.batteryInletTemp: int = 0
+    self.heaterTemp: int = 0
+    self.sunrise: str = "--:--"
+    self.sunset: str = "--:--"
+
     self._font_semi_bold: rl.Font = gui_app.font(FontWeight.SEMI_BOLD)
     self._font_bold: rl.Font = gui_app.font(FontWeight.BOLD)
     self._font_medium: rl.Font = gui_app.font(FontWeight.MEDIUM)
@@ -83,6 +101,7 @@ class HudRenderer(Widget):
 
     controls_state = sm['controlsState']
     car_state = sm['carState']
+    ioniq_state = sm['ioniq']
 
     v_cruise_cluster = car_state.vCruiseCluster
     self.set_speed = (
@@ -100,6 +119,24 @@ class HudRenderer(Widget):
     speed_conversion = CV.MS_TO_KPH if ui_state.is_metric else CV.MS_TO_MPH
     self.speed = max(0.0, v_ego * speed_conversion)
 
+    self.altitude = ioniq_state.altitudeMsl
+    self.power = ioniq_state.voltage * ioniq_state.current / 1000.0
+    self.current = ioniq_state.current
+
+    self.energySinceIgnition = ioniq_state.energySinceIgnition / 1000.0
+    self.energySinceCharging = ioniq_state.energySinceCharging / 1000.0
+
+    self.maxChargePower = ioniq_state.availableChargePower
+    self.maxDischargePower = ioniq_state.availableDischargePower
+    self.maxRequestedChargeCurrent = ioniq_state.maximumChargeCurrent
+    self.maxRequestedChargePower = ioniq_state.maximumChargePower
+    self.minBatteryTemp = ioniq_state.minBatteryTemp
+    self.maxBatteryTemp = ioniq_state.maxBatteryTemp
+    self.batteryInletTemp = ioniq_state.batteryInletTemp
+    self.heaterTemp = ioniq_state.heaterTemp
+    self.sunrise = ioniq_state.sunrise
+    self.sunset = ioniq_state.sunset
+
   def _render(self, rect: rl.Rectangle) -> None:
     """Render HUD elements to the screen."""
     # Draw the header background
@@ -116,6 +153,10 @@ class HudRenderer(Widget):
       self._draw_set_speed(rect)
 
     self._draw_current_speed(rect)
+
+    self._draw_power(rect)
+    self._draw_energy(rect)
+    self._draw_altitude(rect)
 
     button_x = rect.x + rect.width - UI_CONFIG.border_size - UI_CONFIG.button_size
     button_y = rect.y + UI_CONFIG.border_size
@@ -178,3 +219,27 @@ class HudRenderer(Widget):
     unit_text_size = measure_text_cached(self._font_medium, unit_text, FONT_SIZES.speed_unit)
     unit_pos = rl.Vector2(rect.x + rect.width / 2 - unit_text_size.x / 2, 290 - unit_text_size.y / 2)
     rl.draw_text_ex(self._font_medium, unit_text, unit_pos, FONT_SIZES.speed_unit, 0, COLORS.WHITE_TRANSLUCENT)
+
+  def _draw_statistic(self, rect: rl.Rectangle, label: str, text: str, x: int, y: int) -> None:
+    label_size = measure_text_cached(self._font_medium, label, 60)
+    label_pos = rl.Vector2(rect.x + x - label_size.x / 2, rect.height - y - label_size.y / 2)
+    rl.draw_text_ex(self._font_medium, label, label_pos, 60, 0, COLORS.WHITE_TRANSLUCENT)
+
+    text_size = measure_text_cached(self._font_bold, text, 70)
+    text_pos = rl.Vector2(rect.x + x - text_size.x / 2, rect.height - (y - 75) - text_size.y / 2)
+    rl.draw_text_ex(self._font_bold, text, text_pos, 70, 0, COLORS.WHITE)
+
+  def _draw_power(self, rect: rl.Rectangle) -> None:
+    """Draw the current power consumed from the battery in kW"""
+    text = str(round(self.power, 1)) + " kW"
+    self._draw_statistic(rect, "Power", text, 175, 445)
+
+  def _draw_energy(self, rect: rl.Rectangle) -> None:
+    """Draw the energy consumed since ignition start in kWh"""
+    text = str(round(self.energySinceIgnition, 1)) + " kWh"
+    self._draw_statistic(rect, "Energy", text, 175, 285)
+
+  def _draw_altitude(self, rect: rl.Rectangle) -> None:
+    """Draw the GPS altitude MSL"""
+    text = str(round(self.altitude * 3.28084)) + " ft"
+    self._draw_statistic(rect, "Altitude", text, 175, 125)
