@@ -499,18 +499,18 @@ class Modem:
       return []
     # +CGCONTRDP: <cid>,<bearer_id>,<apn>,<local_addr>,<gw_addr>,<dns_prim>,<dns_sec>,...
     fields = [f.strip().strip('"') for f in v.split(",")]
-    dns_servers = []
-    for d in fields[5:7]:
-      try:
-        dns_servers.append(str(IPv4Address(d)))
-      except (AddressValueError, ValueError):
-        pass
-    if not dns_servers:
-      dns_servers = [
-        "8.8.8.8",  # Google
-        "1.1.1.1",  # Cloudflare
-      ]
-      logging.warning(f"no cellular DNS servers reported by modem: {v!r}; using fallback {dns_servers}")
+    dns_servers = ["1.1.1.1", "1.0.0.1"] # Default to Cloudflare DNS and ignore cellular DNS
+    # for d in fields[5:7]:
+    #   try:
+    #     dns_servers.append(str(IPv4Address(d)))
+    #   except (AddressValueError, ValueError):
+    #     pass
+    # if not dns_servers:
+    #   dns_servers = [
+    #     "8.8.8.8",  # Google
+    #     "1.1.1.1",  # Cloudflare
+    #   ]
+    #   logging.warning(f"no cellular DNS servers reported by modem: {v!r}; using fallback {dns_servers}")
     return dns_servers
 
   def _poll_byte_counters(self) -> dict:
