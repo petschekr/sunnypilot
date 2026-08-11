@@ -66,8 +66,13 @@ def reset_context():
 
 
 def log_from_bytes(dat: bytes, struct: capnp.lib.capnp._StructModule = log.Event) -> capnp.lib.capnp._DynamicStructReader:
-  with struct.from_bytes(dat, traversal_limit_in_words=NO_TRAVERSAL_LIMIT) as msg:
-    return msg
+  try:
+    with struct.from_bytes(dat, traversal_limit_in_words=NO_TRAVERSAL_LIMIT) as msg:
+      return msg
+  except ValueError:
+    print("Invalid log received:")
+    print(bytes)
+    return struct.new_message()
 
 
 def new_message(service: str | None, size: int | None = None, **kwargs) -> capnp.lib.capnp._DynamicStructBuilder:
