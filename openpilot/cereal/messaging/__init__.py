@@ -258,7 +258,10 @@ class SubMaster:
       self.seen[s] = True
       self.updated[s] = True
 
-      self.freq_tracker[s].record_recv_time(cur_time)
+      try:
+        self.freq_tracker[s].record_recv_time(cur_time)
+      except KeyError:
+        pass
       self.recv_time[s] = cur_time
       self.recv_frame[s] = self.frame
       self.data[s] = getattr(msg, s)
