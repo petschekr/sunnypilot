@@ -77,7 +77,6 @@ class UIState(UIStateSP):
         "vehicleParameters",
         "testJoystick",
         "rawAudioData",
-        "ioniq",
       ] + self.sm_services_ext
     )
 
